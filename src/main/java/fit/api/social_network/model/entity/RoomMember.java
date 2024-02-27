@@ -1,28 +1,17 @@
 package fit.api.social_network.model.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.Data;
-
-import java.util.Date;
 
 @Data
 @Entity
-public class RoomMember {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "room_member_id")
-    private Long id;
-
+public class RoomMember extends BaseEntity{
     @ManyToOne
     @JoinColumn(name="room_id", nullable = false)
     private Room room;
-
     @ManyToOne
     @JoinColumn(name="user_id", nullable = false)
     private User user;
-
-    private Date createdDate;
-    private Date modifiedDate;
-    private Integer status;
-
 }
