@@ -1,21 +1,16 @@
 package fit.api.social_network.model.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
 import lombok.Data;
 
 import java.util.Date;
 
 @Entity
 @Data
-public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id")
-    private Long id;
-
+public class User extends BaseEntity {
     @Column(unique = true)
     private String name;
-
     private String email;
     private String password;
     private String bio;
@@ -23,8 +18,5 @@ public class User {
     private Integer kind;
     private String otp;
     private Date otpExpiredDate;
-    private Date createdDate;
-    private Date modifiedDate;
     private Date banedExpiredDate;
-    private Integer status;
 }
