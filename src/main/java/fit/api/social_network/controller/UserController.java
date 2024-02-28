@@ -7,6 +7,7 @@ import fit.api.social_network.model.entity.User;
 import fit.api.social_network.model.mapper.UserMapper;
 import fit.api.social_network.model.response.ApiResponse;
 import fit.api.social_network.repository.UserRepository;
+import fit.api.social_network.service.impl.MailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,8 +20,9 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class UserController {
     @Autowired
-    UserRepository userRepository;
-    private final UserMapper userMapper;
+    private UserRepository userRepository;
+    @Autowired
+    private UserMapper userMapper;
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse> getById(@PathVariable Long id){
         try {

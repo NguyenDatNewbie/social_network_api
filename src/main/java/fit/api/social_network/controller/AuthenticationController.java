@@ -7,6 +7,7 @@ import fit.api.social_network.model.request.user.LoginRequest;
 import fit.api.social_network.model.request.user.RegisterRequest;
 import fit.api.social_network.model.response.ApiResponse;
 import fit.api.social_network.service.AuthenticationService;
+import fit.api.social_network.service.impl.MailService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,8 @@ import java.util.Map;
 public class AuthenticationController {
     @Autowired
     private AuthenticationService authenticationService;
+    @Autowired
+    private MailService mailService;
     @PostMapping("/register")
     public ResponseEntity<ApiResponse> register(@Valid @RequestBody RegisterRequest registerRequest, BindingResult bindingResult){
         ApiResponse apiResponse;
