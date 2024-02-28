@@ -3,8 +3,8 @@ package fit.api.social_network.controller;
 import fit.api.social_network.exception.ApplicationException;
 import fit.api.social_network.exception.NotFoundException;
 import fit.api.social_network.exception.ValidationException;
-import fit.api.social_network.model.request.LoginRequest;
-import fit.api.social_network.model.request.RegisterRequest;
+import fit.api.social_network.model.request.user.LoginRequest;
+import fit.api.social_network.model.request.user.RegisterRequest;
 import fit.api.social_network.model.response.ApiResponse;
 import fit.api.social_network.service.AuthenticationService;
 import jakarta.validation.Valid;
@@ -23,7 +23,7 @@ import java.util.Map;
 @RequestMapping("/api/auth")
 public class AuthenticationController {
     @Autowired
-    AuthenticationService authenticationService;
+    private AuthenticationService authenticationService;
     @PostMapping("/register")
     public ResponseEntity<ApiResponse> register(@Valid @RequestBody RegisterRequest registerRequest, BindingResult bindingResult){
         ApiResponse apiResponse;

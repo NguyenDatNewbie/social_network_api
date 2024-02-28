@@ -14,7 +14,9 @@ public class Comments extends BaseEntity{
     @ManyToOne
     @JoinColumn(name="post_id", nullable = false)
     private Posts post;
-    private Long parent_id;
+    @ManyToOne
+    @JoinColumn(name="parent_id")
+    private Comments parent;
     private Integer kind;
     private String comment;
 }

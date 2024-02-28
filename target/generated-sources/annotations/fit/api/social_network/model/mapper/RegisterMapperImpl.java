@@ -1,13 +1,13 @@
 package fit.api.social_network.model.mapper;
 
 import fit.api.social_network.model.entity.User;
-import fit.api.social_network.model.request.RegisterRequest;
+import fit.api.social_network.model.request.user.RegisterRequest;
 import javax.annotation.processing.Generated;
 import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2024-02-28T02:19:37+0700",
+    date = "2024-02-28T21:18:56+0700",
     comments = "version: 1.4.2.Final, compiler: javac, environment: Java 17.0.6 (JetBrains s.r.o.)"
 )
 @Component

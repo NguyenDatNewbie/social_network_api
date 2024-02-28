@@ -1,7 +1,7 @@
 package fit.api.social_network.validator;
 
 import fit.api.social_network.model.entity.User;
-import fit.api.social_network.model.request.RegisterRequest;
+import fit.api.social_network.model.request.user.RegisterRequest;
 import fit.api.social_network.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

@@ -14,6 +14,8 @@ public class ApiResponse<T> {
     private T payload;
     private Map<String, String> error;
     private Map<String, Object> metadata;
+    private Long totalElements;
+    private Integer totalPages;
 
     public void ok() {
         this.status = StatusEnum.SUCCESS;
@@ -22,6 +24,12 @@ public class ApiResponse<T> {
     public void ok(T data) {
         this.status = StatusEnum.SUCCESS;
         this.payload = data;
+    }
+    public void ok(T data, Long totalElements, Integer totalPages) {
+        this.status = StatusEnum.SUCCESS;
+        this.payload = data;
+        this.totalElements = totalElements;
+        this.totalPages = totalPages;
     }
 
     public void ok(T data, HashMap<String, Object> metadata) {
