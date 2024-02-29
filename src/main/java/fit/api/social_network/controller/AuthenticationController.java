@@ -3,20 +3,23 @@ package fit.api.social_network.controller;
 import fit.api.social_network.exception.ApplicationException;
 import fit.api.social_network.exception.NotFoundException;
 import fit.api.social_network.exception.ValidationException;
+import fit.api.social_network.model.entity.User;
+import fit.api.social_network.model.request.user.ForgotPasswordRequest;
 import fit.api.social_network.model.request.user.LoginRequest;
 import fit.api.social_network.model.request.user.RegisterRequest;
 import fit.api.social_network.model.response.ApiResponse;
+import fit.api.social_network.repository.UserRepository;
 import fit.api.social_network.service.AuthenticationService;
 import fit.api.social_network.service.impl.MailService;
+import fit.api.social_network.util.StringUtils;
 import jakarta.validation.Valid;
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -27,6 +30,10 @@ public class AuthenticationController {
     private AuthenticationService authenticationService;
     @Autowired
     private MailService mailService;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     @PostMapping("/register")
     public ResponseEntity<ApiResponse> register(@Valid @RequestBody RegisterRequest registerRequest, BindingResult bindingResult){
         ApiResponse apiResponse;
@@ -58,6 +65,51 @@ public class AuthenticationController {
             apiResponse = new ApiResponse();
             apiResponse.error(ex.getErrors());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiResponse);
+        } catch (ApplicationException ex) {
+            apiResponse = new ApiResponse();
+            apiResponse.error(ex.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(apiResponse);
+        }
+    }
+
+    @PostMapping("/create-password")
+    public ResponseEntity<ApiResponse> forgot(@Valid @RequestBody ForgotPasswordRequest forgotPasswordRequest, BindingResult bindingResult){
+        ApiResponse apiResponse = new ApiResponse();
+        try {
+            User user = userRepository.findFirstByEmailAndOtp(forgotPasswordRequest.getEmail(),forgotPasswordRequest.getOtp()).orElse(null);
+            if(user == null){
+                apiResponse.error("User not found");
+                return ResponseEntity.ok(apiResponse);
+//                throw new NotFoundException("User not found");
+            }
+            if(!user.getOtp().equals(forgotPasswordRequest.getOtp())){
+                apiResponse.error("otp not match");
+                return ResponseEntity.ok(apiResponse);
+            }
+            user.setPassword(passwordEncoder.encode(forgotPasswordRequest.getPassword()));
+            userRepository.save(user);
+            apiResponse.ok("Success");
+            return ResponseEntity.ok(apiResponse);
+        } catch (ApplicationException ex) {
+            apiResponse = new ApiResponse();
+            apiResponse.error(ex.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(apiResponse);
+        }
+    }
+    @GetMapping("/send-otp")
+    public ResponseEntity<ApiResponse> forgot(@RequestParam("email") String email){
+        ApiResponse apiResponse = new ApiResponse();
+        try {
+            User user = userRepository.findByEmail(email).orElse(null);
+            if(user == null){
+                apiResponse.error("User not found");
+                return ResponseEntity.ok(apiResponse);
+            }
+            user.setOtp(StringUtils.generateRandomString(6));
+            mailService.sendVerificationCode(email, user.getOtp());
+            userRepository.save(user);
+            apiResponse.ok("Success");
+            return ResponseEntity.ok(apiResponse);
         } catch (ApplicationException ex) {
             apiResponse = new ApiResponse();
             apiResponse.error(ex.getMessage());
