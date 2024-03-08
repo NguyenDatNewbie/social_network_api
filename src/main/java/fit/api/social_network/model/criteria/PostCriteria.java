@@ -1,6 +1,5 @@
 package fit.api.social_network.model.criteria;
 
-import fit.api.social_network.model.entity.MessageViews;
 import fit.api.social_network.model.entity.Posts;
 import fit.api.social_network.model.entity.User;
 import jakarta.persistence.criteria.*;
@@ -19,6 +18,8 @@ public class PostCriteria {
     private String image_url;
     private String caption;
     private Integer kind;
+    private Integer likedAmount;
+    private Boolean isSortTopLike;
 
     public Specification<Posts> getSpecification() {
         return new Specification<Posts>() {
@@ -34,6 +35,9 @@ public class PostCriteria {
                 if (getStatus() != null) {
                     predicates.add(cb.equal(root.get("status"), getStatus()));
                 }
+                if (getLikedAmount() != null) {
+                    predicates.add(cb.equal(root.get("likedAmount"), getStatus()));
+                }
                 if (getKind() != null) {
                     predicates.add(cb.equal(root.get("kind"), getKind()));
                 }
@@ -46,6 +50,9 @@ public class PostCriteria {
                 }
                 if(!StringUtils.isBlank(getCaption())){
                     predicates.add(cb.equal(cb.lower(root.get("caption")),"%"+ getCaption()+"%"));
+                }
+                if(Boolean.TRUE.equals(getIsSortTopLike())) {
+                    query.orderBy(cb.desc(root.get("likedAmount")));
                 }
                 return cb.and(predicates.toArray(new Predicate[predicates.size()]));
             }
