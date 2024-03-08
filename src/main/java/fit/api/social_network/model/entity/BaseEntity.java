@@ -14,11 +14,9 @@ public class BaseEntity {
     @Column(name = "id")
     private Long id;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_date")
     private Date createdDate;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "modified_date")
     private Date modifiedDate;
     private Integer status = 1;
