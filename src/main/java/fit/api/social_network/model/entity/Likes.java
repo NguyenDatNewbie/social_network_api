@@ -1,12 +1,12 @@
 package fit.api.social_network.model.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Data
+@EntityListeners(AuditingEntityListener.class)
 public class Likes extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

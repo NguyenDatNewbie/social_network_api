@@ -1,11 +1,9 @@
 package fit.api.social_network.model.entity;
 
 import fit.api.social_network.model.enums.ROLES;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -14,6 +12,7 @@ import java.util.Date;
 
 @Entity
 @Data
+@EntityListeners(AuditingEntityListener.class)
 public class User extends BaseEntity implements UserDetails {
     @Column(unique = true)
     private String name;
