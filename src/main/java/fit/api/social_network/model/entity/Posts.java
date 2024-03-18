@@ -15,4 +15,5 @@ public class Posts extends BaseEntity{
     private String caption;
     private Integer kind; // Posts & Stories
     private Integer likedAmount = 0;
+    private Integer commentedAmount = 0;
 }

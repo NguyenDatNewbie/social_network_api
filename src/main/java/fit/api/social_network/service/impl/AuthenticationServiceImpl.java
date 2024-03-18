@@ -1,5 +1,6 @@
 package fit.api.social_network.service.impl;
 
+import fit.api.social_network.constant.SocialConstant;
 import fit.api.social_network.exception.ApplicationException;
 import fit.api.social_network.exception.ValidationException;
 import fit.api.social_network.model.entity.User;
@@ -47,11 +48,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 throw new ValidationException(validationErrors);
             }
             User user = registerMapper.toEntity(registerRequest);
+            user.setKind(SocialConstant.USER_KIND_USER);
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             userRepository.save(user);
-            String token =jwtService.generateToken(user);
+            String token =jwtService.generateToken(user.getId(),user.getKind(),user);
             Map<String, String> result = new HashMap<>();
             result.put("token",token);
+            result.put("userId",user.getId().toString());
+            result.put("status",user.getStatus().toString());
             return result;
         }
         catch (ApplicationException ex){
@@ -74,9 +78,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                     )
             );
             User user = userRepository.findByEmail(loginRequest.getEmail()).orElse(null);
-            String token =jwtService.generateToken(user);
+            String token =jwtService.generateToken(user.getId(),user.getKind(),user);
             Map<String, String> result = new HashMap<>();
             result.put("token",token);
+            result.put("userId",user.getId().toString());
+            result.put("status",user.getStatus().toString());
             return result;
         }
         catch (Exception ex){
