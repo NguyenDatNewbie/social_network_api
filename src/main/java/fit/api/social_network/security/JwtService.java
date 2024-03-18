@@ -30,7 +30,7 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
     public String extractUserId(String token) {
-        return extractClaim(token, Claims::getSubject);
+        return extractClaim(token, claims -> claims.get("userId", String.class));
     }
     public String generateToken(Long userId,Integer kind, UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();

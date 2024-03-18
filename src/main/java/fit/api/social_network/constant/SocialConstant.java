@@ -15,6 +15,12 @@ public class SocialConstant {
     public static final Integer STATUS_LOCK = -1;
     public static final Integer STATUS_DELETE = -2;
     public static final Integer STATUS_REJECT = -3;
+
+    public static final Integer LIKE_KIND_POST = 1;
+    public static final Integer LIKE_KIND_COMMENT = 2;
+
+    public static final Integer COMMENT_KIND_POST = 1;
+    public static final Integer COMMENT_KIND_COMMENT = 2;
     private SocialConstant(){
         throw new IllegalStateException("Utility class");
     }

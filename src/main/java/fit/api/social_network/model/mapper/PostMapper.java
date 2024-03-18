@@ -1,6 +1,7 @@
 package fit.api.social_network.model.mapper;
 
 import fit.api.social_network.model.entity.Posts;
+import fit.api.social_network.model.request.post.CreatePostRequest;
 import fit.api.social_network.model.response.post.PostResponse;
 import org.mapstruct.*;
 
@@ -24,6 +25,13 @@ public interface PostMapper {
     @BeanMapping(ignoreByDefault = true)
     @Named("toResponse")
     PostResponse toResponse(Posts entity);
+
+    @Mapping(source = "image_url", target = "image_url")
+    @Mapping(source = "caption", target = "caption")
+    @Mapping(source = "kind", target = "kind")
+    @BeanMapping(ignoreByDefault = true)
+    @Named("createFromRequest")
+    Posts createFromRequest(CreatePostRequest createPostRequest);
 
 
     @IterableMapping(elementTargetType = PostResponse.class, qualifiedByName = "toResponse")

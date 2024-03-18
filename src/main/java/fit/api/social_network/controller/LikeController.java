@@ -1,33 +1,46 @@
 package fit.api.social_network.controller;
 
+import fit.api.social_network.constant.SocialConstant;
 import fit.api.social_network.exception.ApplicationException;
 import fit.api.social_network.exception.NotFoundException;
 import fit.api.social_network.model.criteria.FollowerCriteria;
 import fit.api.social_network.model.criteria.LikeCriteria;
 import fit.api.social_network.model.entity.Followers;
 import fit.api.social_network.model.entity.Likes;
+import fit.api.social_network.model.entity.Posts;
+import fit.api.social_network.model.entity.User;
 import fit.api.social_network.model.mapper.FollowerMapper;
 import fit.api.social_network.model.mapper.LikeMapper;
+import fit.api.social_network.model.request.like.CreateLikeRequest;
+import fit.api.social_network.model.request.post.CreatePostRequest;
 import fit.api.social_network.model.response.ApiResponse;
 import fit.api.social_network.repository.FollowersRepository;
 import fit.api.social_network.repository.LikesRepository;
+import fit.api.social_network.repository.PostsRepository;
+import fit.api.social_network.repository.UserRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/likes")
 @RequiredArgsConstructor
-public class LikeController {
+public class LikeController extends AbasicMethod {
     @Autowired
     private LikesRepository likesRepository;
     @Autowired
     private LikeMapper likesMapper;
-
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private PostsRepository postsRepository;
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse> getById(@PathVariable Long id) {
         try {
@@ -69,6 +82,29 @@ public class LikeController {
         } catch (Exception ex) {
             throw new ApplicationException();
         }
+    }
+    @PostMapping("/create")
+    public ResponseEntity<ApiResponse> create(@Valid @RequestBody CreateLikeRequest createLikeRequest, BindingResult bindingResult) {
+        ApiResponse apiResponse = new ApiResponse();
+        User user = userRepository.findById(getCurrentUserId()).orElse(null);
+        if(user == null){
+            apiResponse.error("User not found");
+            return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
+        }
+        Posts post = postsRepository.findById(createLikeRequest.getPostId()).orElse(null);
+        if(post == null){
+            apiResponse.error("Post not found");
+            return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
+        }
+        Likes like = new Likes();
+        like.setUser(user);
+        like.setPost(post);
+        like.setKind(SocialConstant.LIKE_KIND_POST);
+        post.setLikedAmount(post.getLikedAmount()+1);
+        postsRepository.save(post);
+        likesRepository.save(like);
+        apiResponse.ok("Create success");
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 }
 

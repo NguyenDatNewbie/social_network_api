@@ -1,6 +1,7 @@
 package fit.api.social_network.model.mapper;
 
 import fit.api.social_network.model.entity.Comments;
+import fit.api.social_network.model.request.comment.CreateCommentRequest;
 import fit.api.social_network.model.response.comment.CommentResponse;
 import org.mapstruct.*;
 
@@ -23,6 +24,13 @@ public interface CommentMapper {
     @BeanMapping(ignoreByDefault = true)
     @Named("toResponse")
     CommentResponse toResponse(Comments comments);
+
+
+    @Mapping(source = "kind", target = "kind")
+    @Mapping(source = "comment", target = "comment")
+    @BeanMapping(ignoreByDefault = true)
+    @Named("createFromCreateRequest")
+    Comments createFromCreateRequest(CreateCommentRequest createCommentRequest);
 
 
     @IterableMapping(elementTargetType = CommentResponse.class, qualifiedByName = "toResponse")
