@@ -18,6 +18,8 @@ public interface PostMapper {
     @Mapping(source = "kind", target = "kind")
     @Mapping(source = "createdDate", target = "createdDate")
     @Mapping(source = "modifiedDate", target = "modifiedDate")
+    @Mapping(source = "commentedAmount", target = "commentedAmount")
+    @Mapping(source = "likedAmount", target = "likedAmount")
     @Mapping(source = "status", target = "status")
     @BeanMapping(ignoreByDefault = true)
     @Named("toResponse")

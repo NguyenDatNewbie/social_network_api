@@ -29,10 +29,13 @@ public class JwtService {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
-
-    public String generateToken(UserDetails userDetails) {
+    public String extractUserId(String token) {
+        return extractClaim(token, Claims::getSubject);
+    }
+    public String generateToken(Long userId,Integer kind, UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
-//        claims.put("roles", userDetails.getAuthorities());
+        claims.put("userId", userId);
+        claims.put("kind", userId);
         return generateToken(claims, userDetails);
     }
 
