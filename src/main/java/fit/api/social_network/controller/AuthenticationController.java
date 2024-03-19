@@ -1,6 +1,7 @@
 package fit.api.social_network.controller;
 
 import fit.api.social_network.exception.ApplicationException;
+import fit.api.social_network.exception.BadRequestException;
 import fit.api.social_network.exception.NotFoundException;
 import fit.api.social_network.exception.ValidationException;
 import fit.api.social_network.model.entity.User;
@@ -13,7 +14,6 @@ import fit.api.social_network.service.AuthenticationService;
 import fit.api.social_network.service.impl.MailService;
 import fit.api.social_network.util.StringUtils;
 import jakarta.validation.Valid;
-import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +21,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Map;
 
 @RestController
@@ -78,13 +80,11 @@ public class AuthenticationController {
         try {
             User user = userRepository.findFirstByEmailAndOtp(forgotPasswordRequest.getEmail(),forgotPasswordRequest.getOtp()).orElse(null);
             if(user == null){
-                apiResponse.error("User not found");
-                return ResponseEntity.ok(apiResponse);
-//                throw new NotFoundException("User not found");
+                throw new NotFoundException("User not found");
             }
-            if(!user.getOtp().equals(forgotPasswordRequest.getOtp())){
-                apiResponse.error("otp not match");
-                return ResponseEntity.ok(apiResponse);
+            Date currentDate = new Date();
+            if(!user.getOtp().equals(forgotPasswordRequest.getOtp()) || user.getOtpExpiredDate().before(currentDate) ){
+                throw new BadRequestException("Otp not match or expired");
             }
             user.setPassword(passwordEncoder.encode(forgotPasswordRequest.getPassword()));
             userRepository.save(user);
@@ -106,6 +106,10 @@ public class AuthenticationController {
                 return ResponseEntity.ok(apiResponse);
             }
             user.setOtp(StringUtils.generateRandomString(6));
+            // Đặt thời hạn hết hạn là 5 phút
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.MINUTE, 5);
+            user.setOtpExpiredDate(calendar.getTime());
             mailService.sendVerificationCode(email, user.getOtp());
             userRepository.save(user);
             apiResponse.ok("Success");

@@ -8,8 +8,8 @@ import fit.api.social_network.model.entity.Posts;
 import fit.api.social_network.model.entity.User;
 import fit.api.social_network.model.mapper.PostMapper;
 import fit.api.social_network.model.request.post.CreatePostRequest;
+import fit.api.social_network.model.request.post.UpdatePostRequest;
 import fit.api.social_network.model.response.ApiResponse;
-import fit.api.social_network.model.response.StatusEnum;
 import fit.api.social_network.model.response.post.PostResponse;
 import fit.api.social_network.repository.LikesRepository;
 import fit.api.social_network.repository.PostsRepository;
@@ -21,8 +21,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -111,6 +109,22 @@ public class PostController extends AbasicMethod{
         posts.setUser(user);
         postsRepository.save(posts);
         apiResponse.ok("Create success");
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+    @PostMapping("/update")
+    public ResponseEntity<ApiResponse<String>> create(@Valid @RequestBody UpdatePostRequest updatePostRequest, BindingResult bindingResult) {
+        ApiResponse apiResponse = new ApiResponse();
+        User user = userRepository.findById(getCurrentUserId()).orElse(null);
+        if(user == null){
+            throw new NotFoundException("User not found");
+        }
+        Posts posts = postsRepository.findFirstByIdAndUserId(updatePostRequest.getPostId(),user.getId());
+        if(user == null){
+            throw new NotFoundException("Post not found");
+        }
+        postsMapper.updateFromUpdateRequest(updatePostRequest,posts);
+        postsRepository.save(posts);
+        apiResponse.ok("Update success");
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 }

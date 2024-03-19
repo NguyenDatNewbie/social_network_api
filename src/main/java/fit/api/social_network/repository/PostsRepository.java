@@ -12,4 +12,5 @@ import org.springframework.stereotype.Repository;
 public interface PostsRepository extends JpaRepository<Posts,Long>, JpaSpecificationExecutor<Posts> {
     @Query("SELECT COUNT(l) FROM Likes l WHERE l.post.id = :postId")
     int getLikeAmount(@Param("postId") Long postId);
+    Posts findFirstByIdAndUserId(Long id, Long userId);
 }

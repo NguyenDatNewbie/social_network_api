@@ -116,8 +116,8 @@ public class FollowerController extends AbasicMethod{
             throw new NotFoundException("User not found");
         }
         Followers follow = followersRepository.findFirstByUserIdAndAndFollowingUserId(userId,user.getId());
-        if(follow != null){
-            throw new BadRequestException("user already follow this user");
+        if(follow == null){
+            throw new BadRequestException("user not follow this user");
         }
         followersRepository.deleteById(follow.getId());
         apiResponse.ok("Delete success");
