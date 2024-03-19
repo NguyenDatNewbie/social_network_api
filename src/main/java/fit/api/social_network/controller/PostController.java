@@ -3,12 +3,15 @@ package fit.api.social_network.controller;
 import fit.api.social_network.exception.ApplicationException;
 import fit.api.social_network.exception.NotFoundException;
 import fit.api.social_network.model.criteria.PostCriteria;
+import fit.api.social_network.model.entity.Likes;
 import fit.api.social_network.model.entity.Posts;
 import fit.api.social_network.model.entity.User;
 import fit.api.social_network.model.mapper.PostMapper;
 import fit.api.social_network.model.request.post.CreatePostRequest;
 import fit.api.social_network.model.response.ApiResponse;
 import fit.api.social_network.model.response.StatusEnum;
+import fit.api.social_network.model.response.post.PostResponse;
+import fit.api.social_network.repository.LikesRepository;
 import fit.api.social_network.repository.PostsRepository;
 import fit.api.social_network.repository.UserRepository;
 import jakarta.validation.Valid;
@@ -23,6 +26,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/posts")
 @RequiredArgsConstructor
@@ -33,37 +38,59 @@ public class PostController extends AbasicMethod{
     private final PostMapper postsMapper;
     @Autowired
     private UserRepository userRepository;
-
+    @Autowired
+    private LikesRepository likesRepository;
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse> getById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<PostResponse>> getById(@PathVariable Long id) {
         try {
             ApiResponse apiResponse = new ApiResponse();
+            User user = userRepository.findById(getCurrentUserId()).orElse(null);
+            if(user == null){
+                throw new NotFoundException("User not found");
+            }
             Posts post = postsRepository.findById(id).orElse(null);
             if (post == null) {
                 throw new NotFoundException("Post Not Found");
             }
-            apiResponse.ok(postsMapper.toResponse(post));
+            PostResponse postResponse = postsMapper.toResponse(post);
+            setIsLike(postResponse,user.getId());
+            apiResponse.ok(postResponse);
             return new ResponseEntity<>(apiResponse, HttpStatus.OK);
         } catch (Exception ex) {
             throw new ApplicationException();
         }
     }
+    void setIsLike(PostResponse postResponse, Long userId){
+        Likes like = likesRepository.findFirstByPostIdAndUserId(postResponse.getId(),userId);
+        if(like!=null){
+            postResponse.setIsLiked(true);
+        }
+    }
+
 
     @GetMapping("/list")
-    public ResponseEntity<ApiResponse> listPosts(PostCriteria postsCriteria, Pageable pageable) {
+    public ResponseEntity<ApiResponse<List<PostResponse>>> listPosts(PostCriteria postsCriteria, Pageable pageable) {
         ApiResponse apiResponse = new ApiResponse();
+        User user = userRepository.findById(getCurrentUserId()).orElse(null);
+        if(user == null){
+            throw new NotFoundException("User not found");
+        }
         Page<Posts> postPage = postsRepository.findAll(postsCriteria.getSpecification(), pageable);
-        apiResponse.ok(postsMapper.toResponseList(postPage.getContent()), postPage.getTotalElements(), postPage.getTotalPages());
+        List<PostResponse> postResponseList = postsMapper.toResponseList(postPage.getContent());
+        for (PostResponse postResponse: postResponseList){
+            setIsLike(postResponse,user.getId());
+        }
+        apiResponse.ok(postResponseList, postPage.getTotalElements(), postPage.getTotalPages());
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse> delete(@PathVariable Long id) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = (User) authentication.getPrincipal();
-        Long userId = user.getId();
-        System.out.println(userId);
+    public ResponseEntity<ApiResponse<String>> delete(@PathVariable Long id) {
         ApiResponse apiResponse = new ApiResponse();
+        User user = userRepository.findById(getCurrentUserId()).orElse(null);
+        if(user == null){
+            throw new NotFoundException("User not found");
+        }
         Posts post = postsRepository.findById(id).orElse(null);
         if (post == null) {
             throw new NotFoundException("Post Not Found");
@@ -74,12 +101,11 @@ public class PostController extends AbasicMethod{
     }
 
     @PostMapping("/create")
-    public ResponseEntity<ApiResponse> create(@Valid @RequestBody CreatePostRequest createPostRequest, BindingResult bindingResult) {
+    public ResponseEntity<ApiResponse<String>> create(@Valid @RequestBody CreatePostRequest createPostRequest, BindingResult bindingResult) {
         ApiResponse apiResponse = new ApiResponse();
         User user = userRepository.findById(getCurrentUserId()).orElse(null);
         if(user == null){
-            apiResponse.error("User not found");
-            return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
+            throw new NotFoundException("User not found");
         }
         Posts posts = postsMapper.createFromRequest(createPostRequest);
         posts.setUser(user);

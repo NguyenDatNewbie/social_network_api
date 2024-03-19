@@ -19,4 +19,5 @@ public class PostResponse {
     private Integer status;
     private Integer likedAmount;
     private Integer commentedAmount;
+    private Boolean isLiked = false;
 }
