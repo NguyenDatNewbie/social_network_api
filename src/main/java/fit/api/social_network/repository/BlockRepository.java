@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface BlockRepository extends JpaRepository<Block,Long>, JpaSpecificationExecutor<Block> {
+    Block findFirstByUserIdAndBlockUserId(Long userId, Long blockUser);
 }

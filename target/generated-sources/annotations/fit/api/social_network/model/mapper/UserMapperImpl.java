@@ -1,6 +1,7 @@
 package fit.api.social_network.model.mapper;
 
 import fit.api.social_network.model.entity.User;
+import fit.api.social_network.model.request.user.UpdateProfileRequest;
 import fit.api.social_network.model.response.user.UserResponse;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2024-03-19T00:56:38+0700",
+    date = "2024-03-20T00:26:38+0700",
     comments = "version: 1.4.2.Final, compiler: javac, environment: Java 17.0.6 (JetBrains s.r.o.)"
 )
 @Component
@@ -53,5 +54,25 @@ public class UserMapperImpl implements UserMapper {
         }
 
         return list1;
+    }
+
+    @Override
+    public void updateProfile(UpdateProfileRequest updateProfileRequest, User user) {
+        if ( updateProfileRequest == null ) {
+            return;
+        }
+
+        if ( updateProfileRequest.getName() != null ) {
+            user.setName( updateProfileRequest.getName() );
+        }
+        if ( updateProfileRequest.getEmail() != null ) {
+            user.setEmail( updateProfileRequest.getEmail() );
+        }
+        if ( updateProfileRequest.getBio() != null ) {
+            user.setBio( updateProfileRequest.getBio() );
+        }
+        if ( updateProfileRequest.getAvatar() != null ) {
+            user.setAvatar( updateProfileRequest.getAvatar() );
+        }
     }
 }
