@@ -2,6 +2,7 @@ package fit.api.social_network.controller;
 
 import fit.api.social_network.constant.SocialConstant;
 import fit.api.social_network.exception.ApplicationException;
+import fit.api.social_network.exception.BadRequestException;
 import fit.api.social_network.exception.NotFoundException;
 import fit.api.social_network.model.criteria.FollowerCriteria;
 import fit.api.social_network.model.criteria.LikeCriteria;
@@ -83,20 +84,42 @@ public class LikeController extends AbasicMethod {
             throw new ApplicationException();
         }
     }
-    @PostMapping("/create")
-    public ResponseEntity<ApiResponse> create(@Valid @RequestBody CreateLikeRequest createLikeRequest, BindingResult bindingResult) {
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<ApiResponse> deleteByCourseId(@PathVariable Long postId) {
         ApiResponse apiResponse = new ApiResponse();
         User user = userRepository.findById(getCurrentUserId()).orElse(null);
         if(user == null){
-            apiResponse.error("User not found");
-            return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
+            throw new NotFoundException("User not found");
+        }
+        Posts post = postsRepository.findById(postId).orElse(null);
+        if(post == null){
+            throw new NotFoundException("Post not found");
+        }
+        Likes like = likesRepository.findFirstByPostIdAndUserId(postId,user.getId());
+        if(like == null){
+            throw new BadRequestException("user not like this post");
+        }
+        likesRepository.deleteAllByPostIdAndUserId(postId,user.getId());
+        post.setLikedAmount(postsRepository.getLikeAmount(postId));
+        apiResponse.ok("Delete success");
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+    @PostMapping("/create")
+    public ResponseEntity<ApiResponse> create(@Valid @RequestBody CreateLikeRequest createLikeRequest, BindingResult bindingResult) throws BadRequestException {
+        ApiResponse apiResponse = new ApiResponse();
+        User user = userRepository.findById(getCurrentUserId()).orElse(null);
+        if(user == null){
+            throw new NotFoundException("User not found");
+        }
+        Likes like = likesRepository.findFirstByPostIdAndUserId(createLikeRequest.getPostId(),user.getId());
+        if(like != null){
+            throw new BadRequestException("user already like this post");
         }
         Posts post = postsRepository.findById(createLikeRequest.getPostId()).orElse(null);
         if(post == null){
-            apiResponse.error("Post not found");
-            return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
+            throw new NotFoundException("Post not found");
         }
-        Likes like = new Likes();
+        like = new Likes();
         like.setUser(user);
         like.setPost(post);
         like.setKind(SocialConstant.LIKE_KIND_POST);
