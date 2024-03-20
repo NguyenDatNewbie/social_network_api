@@ -17,7 +17,7 @@ public class PostResponse {
     private Date createdDate;
     private Date modifiedDate;
     private Integer status;
-    private Integer likedAmount;
-    private Integer commentedAmount;
+    private Integer likedAmount = 0;
+    private Integer commentedAmount = 0;
     private Boolean isLiked = false;
 }
