@@ -81,6 +81,23 @@ public class PostController extends AbasicMethod{
         apiResponse.ok(postResponseList, postPage.getTotalElements(), postPage.getTotalPages());
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
+    @GetMapping("/my-post")
+    public ResponseEntity<ApiResponse<List<PostResponse>>> myPosts(PostCriteria postsCriteria, Pageable pageable) {
+        ApiResponse apiResponse = new ApiResponse();
+        User user = userRepository.findById(getCurrentUserId()).orElse(null);
+        if(user == null){
+            throw new NotFoundException("User not found");
+        }
+        postsCriteria.setUserId(user.getId());
+        Page<Posts> postPage = postsRepository.findAll(postsCriteria.getSpecification(), pageable);
+        List<PostResponse> postResponseList = postsMapper.toResponseList(postPage.getContent());
+        for (PostResponse postResponse: postResponseList){
+            setIsLike(postResponse,user.getId());
+        }
+        apiResponse.ok(postResponseList, postPage.getTotalElements(), postPage.getTotalPages());
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<String>> delete(@PathVariable Long id) {
