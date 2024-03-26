@@ -84,7 +84,7 @@ public class LikeController extends AbasicMethod {
             throw new ApplicationException();
         }
     }
-    @DeleteMapping("/{postId}")
+    @DeleteMapping("/delete-by-post/{postId}")
     public ResponseEntity<ApiResponse> deleteByCourseId(@PathVariable Long postId) {
         ApiResponse apiResponse = new ApiResponse();
         User user = userRepository.findById(getCurrentUserId()).orElse(null);
