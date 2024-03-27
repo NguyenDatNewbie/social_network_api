@@ -129,7 +129,7 @@ public class LikeController extends AbasicMethod {
         like.setUser(user);
         like.setPost(post);
         like.setKind(createLikeRequest.getKind());
-        if(SocialConstant.LIKE_KIND_POST.equals(createLikeRequest.getKind())){
+        if(SocialConstant.COMMENT_KIND_COMMENT.equals(createLikeRequest.getKind())){
             Comments comments = commentsRepository.findById(createLikeRequest.getCommentId()).orElse(null);
             if(comments == null){
                 throw new NotFoundException("Comment not found");
