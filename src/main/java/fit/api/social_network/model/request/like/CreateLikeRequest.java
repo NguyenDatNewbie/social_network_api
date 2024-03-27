@@ -12,4 +12,7 @@ import java.io.Serializable;
 public class CreateLikeRequest implements Serializable {
     @NonNull
     private Long postId;
+    private Long commentId;
+    @NonNull
+    private Integer kind;
 }
