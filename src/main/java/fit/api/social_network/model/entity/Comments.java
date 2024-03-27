@@ -23,5 +23,6 @@ public class Comments extends BaseEntity{
     @JoinColumn(name="parent_id")
     private Comments parent;
     private Integer kind;
+    @Column(columnDefinition = "text")
     private String comment;
 }

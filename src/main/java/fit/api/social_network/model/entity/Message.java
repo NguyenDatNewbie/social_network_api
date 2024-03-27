@@ -18,5 +18,6 @@ public class Message extends BaseEntity{
     @Cascade(CascadeType.REMOVE)
     @JoinColumn(name="sender_id", nullable = false)
     private User sender;
+    @Column(columnDefinition = "text")
     private String message;
 }
