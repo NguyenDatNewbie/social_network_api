@@ -6,19 +6,13 @@ import fit.api.social_network.exception.BadRequestException;
 import fit.api.social_network.exception.NotFoundException;
 import fit.api.social_network.model.criteria.FollowerCriteria;
 import fit.api.social_network.model.criteria.LikeCriteria;
-import fit.api.social_network.model.entity.Followers;
-import fit.api.social_network.model.entity.Likes;
-import fit.api.social_network.model.entity.Posts;
-import fit.api.social_network.model.entity.User;
+import fit.api.social_network.model.entity.*;
 import fit.api.social_network.model.mapper.FollowerMapper;
 import fit.api.social_network.model.mapper.LikeMapper;
 import fit.api.social_network.model.request.like.CreateLikeRequest;
 import fit.api.social_network.model.request.post.CreatePostRequest;
 import fit.api.social_network.model.response.ApiResponse;
-import fit.api.social_network.repository.FollowersRepository;
-import fit.api.social_network.repository.LikesRepository;
-import fit.api.social_network.repository.PostsRepository;
-import fit.api.social_network.repository.UserRepository;
+import fit.api.social_network.repository.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.parameters.P;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,6 +37,8 @@ public class LikeController extends AbasicMethod {
     private UserRepository userRepository;
     @Autowired
     private PostsRepository postsRepository;
+    @Autowired
+    private CommentsRepository commentsRepository;
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse> getById(@PathVariable Long id) {
         try {
@@ -104,6 +101,7 @@ public class LikeController extends AbasicMethod {
         apiResponse.ok("Delete success");
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
+    @Transactional
     @PostMapping("/create")
     public ResponseEntity<ApiResponse> create(@Valid @RequestBody CreateLikeRequest createLikeRequest, BindingResult bindingResult) throws BadRequestException {
         ApiResponse apiResponse = new ApiResponse();
@@ -111,7 +109,15 @@ public class LikeController extends AbasicMethod {
         if(user == null){
             throw new NotFoundException("User not found");
         }
-        Likes like = likesRepository.findFirstByPostIdAndUserId(createLikeRequest.getPostId(),user.getId());
+        Likes like;
+        if(SocialConstant.LIKE_KIND_POST.equals(createLikeRequest.getKind())){
+            like = likesRepository.findFirstByPostIdAndUserIdAndKind(createLikeRequest.getPostId(),user.getId(),SocialConstant.LIKE_KIND_POST);
+        }else {
+            if(createLikeRequest.getCommentId() == null){
+                throw new BadRequestException("create comment like must enter commentId");
+            }
+            like = likesRepository.findFirstByCommentIdAndUserIdAndKind(createLikeRequest.getCommentId(),user.getId(),SocialConstant.LIKE_KIND_COMMENT);
+        }
         if(like != null){
             throw new BadRequestException("user already like this post");
         }
@@ -122,8 +128,16 @@ public class LikeController extends AbasicMethod {
         like = new Likes();
         like.setUser(user);
         like.setPost(post);
-        like.setKind(SocialConstant.LIKE_KIND_POST);
-        post.setLikedAmount(post.getLikedAmount()+1);
+        like.setKind(createLikeRequest.getKind());
+        if(SocialConstant.LIKE_KIND_POST.equals(createLikeRequest.getKind())){
+            Comments comments = commentsRepository.findById(createLikeRequest.getCommentId()).orElse(null);
+            if(comments == null){
+                throw new NotFoundException("Comment not found");
+            }
+            like.setComment(comments);
+        }else {
+            post.setLikedAmount(post.getLikedAmount()+1);
+        }
         postsRepository.save(post);
         likesRepository.save(like);
         apiResponse.ok("Create success");
