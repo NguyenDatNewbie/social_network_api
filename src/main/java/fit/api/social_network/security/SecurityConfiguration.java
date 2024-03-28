@@ -29,6 +29,7 @@ public class SecurityConfiguration {
                         authorization.requestMatchers("/api/auth/**",
                                                     "/error/**",
                                                     "/swagger-ui/**",
+                                    "/app/chat",
                                     "/v3/api-docs/**").permitAll().anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)

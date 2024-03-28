@@ -21,6 +21,10 @@ public class SocialConstant {
 
     public static final Integer COMMENT_KIND_POST = 1;
     public static final Integer COMMENT_KIND_COMMENT = 2;
+
+    public static final Integer ROOM_TYPE_GROUP = 1;
+    public static final Integer ROOM_TYPE_PERSONAL = 2;
+
     private SocialConstant(){
         throw new IllegalStateException("Utility class");
     }
